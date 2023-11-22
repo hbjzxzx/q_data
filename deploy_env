@@ -1,0 +1,2 @@
+PG_PATH=/mnt/user/q_data_proj/pg_data_dir
+MINIO_PATH=/mnt/user/q_data_proj/minio_data_dir
