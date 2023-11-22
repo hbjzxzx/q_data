@@ -15,6 +15,7 @@ echo "db running...."
 echo "stop command: docker-compose -f db_compose.yml -p db down"
 
 echo "up tools..."
+# FIXME this name should be fixed
 docker exec db-postgres-1 psql -d postgres -c "CREATE DATABASE prefect"
 
 docker-compose -f tools_compose.yml --env-file ${env_file} up -d
