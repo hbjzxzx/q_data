@@ -1,5 +1,5 @@
-env_file="dev_env"
-# env_file="deploy_env"
+# env_file="dev_env"
+env_file="deploy_env"
 network_name="q_data_proj_pg_net"
 
 if docker network inspect "$network_name" >/dev/null 2>&1; then
@@ -18,6 +18,6 @@ echo "up tools..."
 # FIXME this name should be fixed
 docker exec db-postgres-1 psql -d postgres -c "CREATE DATABASE prefect"
 
-docker-compose -f tools_compose.yml --env-file ${env_file} up -d
+docker-compose -f tools_compose.yml --env-file ${env_file} -p tools up -d
 echo "tools running..."
 echo "stop command: docker-compose -f tools_compose.yml --env-file ${env_file} up"
