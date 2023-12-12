@@ -1,5 +1,5 @@
-# env_file="dev_env"
-env_file="deploy_env"
+env_file="dev_env"
+# env_file="deploy_env"
 network_name="q_data_proj_pg_net"
 
 if docker network inspect "$network_name" >/dev/null 2>&1; then
