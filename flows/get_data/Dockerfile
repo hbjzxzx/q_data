@@ -5,4 +5,4 @@ RUN pip install -r requirements.txt
 
 ENV PREFECT_API_URL=http://tools-prefect-1:4200/api
 # Run our flow script when the container starts
-CMD ["python", "stock_list.py"]
+CMD ["python", "get_data.py"]
