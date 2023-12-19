@@ -3,3 +3,4 @@ pandas
 requests
 yfinance
 psycopg2-binary
+sqlalchemy
