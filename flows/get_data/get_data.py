@@ -187,6 +187,7 @@ def get_symbol_list(conn: db.Connection, query_sql: Optional[str] = None) -> Seq
         query = db.text("""
                         SELECT symbol, exchange 
                         FROM stock_meta
+                        WHERE delistingdate is NULL
                         LIMIT 10;
                         """)
     else:
