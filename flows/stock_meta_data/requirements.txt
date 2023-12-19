@@ -1,4 +1,6 @@
 s3fs
 pandas
 requests
-pandas-market-calendars
+psycopg2-binary
+sqlalchemy
+pandas_market_calendars
