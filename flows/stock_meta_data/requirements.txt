@@ -1,3 +1,4 @@
 s3fs
 pandas
 requests
+pandas-market-calendars
