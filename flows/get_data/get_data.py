@@ -199,7 +199,7 @@ def get_symbol_list(conn: db.Connection, query_sql: Optional[str] = None) -> Seq
 
 @flow()
 def download_last_day_1m_date_all(start_date: Optional[datetime.date] = None,
-                                  query_sql: Optional[int] = None,
+                                  query_sql: Optional[str] = None,
                                   chunk_size: int = 2):
     engine = db.create_engine(variables.get('q_data_db_connect_url'))
     conn = engine.connect()
