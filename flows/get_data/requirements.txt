@@ -4,3 +4,4 @@ requests
 yfinance
 psycopg2-binary
 sqlalchemy
+pandas_market_calendars
