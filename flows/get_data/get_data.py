@@ -1,6 +1,7 @@
 from prefect import flow, task, variables, serve, get_run_logger
 from prefect.filesystems import RemoteFileSystem
 from prefect.tasks import task_input_hash
+from prefect.states import Completed
 
 import traceback 
 
@@ -186,8 +187,7 @@ def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]],
              for symbol, exchange in symbol_list
         ]
     
-        record = [record_download_result.submit(engine, f.result()) for f in future_task_list]
-        [r.result() for r in record]
+        return [record_download_result.submit(engine, f.result()) for f in future_task_list]
     except:
         logger.exception(f'download 1m data for symbol list: {symbol_list} on date: {start_date} fail.')
     finally:
