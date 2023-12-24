@@ -40,7 +40,11 @@ SymbolName = str
 ExchangeName = str
 
 
-@task(log_prints=True, retries=3, tags=['yahooh'])
+@task(log_prints=True, 
+      retries=3, 
+      tags=['yahooh'], 
+      cache_result_in_memory=False,
+      persist_result=False)
 def download_one_day(symbol: str, 
                      exchange: str, 
                      start_time: datetime.date,
