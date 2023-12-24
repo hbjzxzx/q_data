@@ -131,7 +131,9 @@ def download_one_day(symbol: str,
     return result_list
             
 
-@task(log_prints=True)
+@task(log_prints=True, 
+      cache_result_in_memory=False,
+      persist_result=False)
 def download_option(symbol: str, 
                      exchange: str, 
                      start_time: datetime.date):
@@ -159,20 +161,15 @@ def download_option(symbol: str,
         call_save_path = os.path.join('') 
 
 
-@task(log_prints=True, tags=['record_write_db'])
+@task(log_prints=True, 
+      tags=['record_write_db'],
+      cache_result_in_memory=False,
+      persist_result=False)
 def record_download_result(engine: db.Engine, record_list: List[DownResult]):
     with orm.Session(engine) as session:
         session.add_all(record_list)
         session.commit()
-
-
-@task(log_prints=True, cache_key_fn=task_input_hash)
-def make_sure_result_table_exist(engine: db.Engine, conn: db.Connection):
-    if engine.dialect.has_table(conn, DownResult.__tablename__):
-        return
     
-    DownResult.metadata.create_all(engine)
-                 
 
 @flow(log_prints=True)
 def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]], 
@@ -181,7 +178,8 @@ def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]],
     conn = engine.connect()
     logger = get_run_logger()
     try:
-        make_sure_result_table_exist(engine, conn)
+        if not db.inspect(engine).has_table(DownResult.__tablename__):
+            DownResult.metadata.create_all(engine)
         if start_date is None:
             start_date = datetime.date.today() - datetime.timedelta(days=1.0)
         interval = '1m'
@@ -191,7 +189,12 @@ def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]],
              for symbol, exchange in symbol_list
         ]
     
-        return [record_download_result.submit(engine, f.result()) for f in future_task_list]
+        # return [record_download_result.submit(engine, f.result()) for f in future_task_list]
+        return [record_download_result.submit(
+                    download_one_day.submit(symbol, exchange, start_date, interval))
+                for symbol, exchange in symbol_list
+                ]
+
     except:
         logger.exception(f'download 1m data for symbol list: {symbol_list} on date: {start_date} fail.')
     finally:
@@ -240,7 +243,11 @@ def download_1m_date_all(start_date: Optional[datetime.date] = None,
         engine.dispose()
         conn.close()
 
-@task(log_prints=True, retries=3, tags=['inject_OHLC_into_db'])
+@task(log_prints=True, 
+      retries=3, 
+      tags=['inject_OHLC_into_db'],
+      cache_result_in_memory=False,
+      persist_result=False)
 def inject_a_symbol_data(symbol: str, 
                          date_time: datetime.date
                          ):
@@ -332,12 +339,12 @@ def inject_a_symbol_data(symbol: str,
         conn.close()
         engine.dispose()
 
+
 @flow(log_prints=True)
 def inject_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]],
                      date_time: datetime.date 
                      ):
-    result_list = [inject_a_symbol_data.submit(sym, date_time) for sym, _ in symbol_list] 
-    [r.result() for r in result_list]
+    return [inject_a_symbol_data.submit(sym, date_time) for sym, _ in symbol_list] 
     
 
 @flow(log_prints=True)
@@ -365,4 +372,4 @@ def inject_data_all(query_symbol_sql: Optional[str] = None,
 if __name__ == "__main__":
     down_load_data = download_1m_date_all.to_deployment(name='down_load_1m_data')
     inject_data = inject_data_all.to_deployment(name='inject_data_all')
-    serve(down_load_data, inject_data)
+    serve(down_load_data, inject_data, tst)
