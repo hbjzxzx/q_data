@@ -127,9 +127,14 @@ def download_one_day(symbol: str,
                 symbol=symbol,
                 exchange=exchange,
                 file_path=''))
-    
-    return result_list
-            
+
+    try:
+        # dump to db the result
+        engine = db.create_engine(variables.get('q_data_db_connect_url')) 
+        record_download_result(engine, result_list)
+    except Exception as e:     
+        logger.exception(f'download 1m data for symbol {symbol} on date: {start_time} fail.')
+
 
 @task(log_prints=True, 
       cache_result_in_memory=False,
@@ -161,10 +166,6 @@ def download_option(symbol: str,
         call_save_path = os.path.join('') 
 
 
-@task(log_prints=True, 
-      tags=['record_write_db'],
-      cache_result_in_memory=False,
-      persist_result=False)
 def record_download_result(engine: db.Engine, record_list: List[DownResult]):
     with orm.Session(engine) as session:
         session.add_all(record_list)
@@ -173,7 +174,7 @@ def record_download_result(engine: db.Engine, record_list: List[DownResult]):
 
 @flow(log_prints=True)
 def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]], 
-                                    start_date: Optional[datetime.date] = None):  
+                          start_date: Optional[datetime.date] = None):  
     engine = db.create_engine(variables.get('q_data_db_connect_url'))
     conn = engine.connect()
     logger = get_run_logger()
@@ -184,16 +185,8 @@ def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]],
             start_date = datetime.date.today() - datetime.timedelta(days=1.0)
         interval = '1m'
 
-        future_task_list = [
-             download_one_day.submit(symbol, exchange, start_date, interval)
-             for symbol, exchange in symbol_list
-        ]
-    
-        # return [record_download_result.submit(engine, f.result()) for f in future_task_list]
-        return [record_download_result.submit(
-                    download_one_day.submit(symbol, exchange, start_date, interval))
-                for symbol, exchange in symbol_list
-                ]
+        return [download_one_day.submit(symbol, exchange, start_date, interval)
+                for symbol, exchange in symbol_list]
 
     except:
         logger.exception(f'download 1m data for symbol list: {symbol_list} on date: {start_date} fail.')
