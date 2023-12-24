@@ -134,6 +134,8 @@ def download_one_day(symbol: str,
         record_download_result(engine, result_list)
     except Exception as e:     
         logger.exception(f'download 1m data for symbol {symbol} on date: {start_time} fail.')
+    finally:
+        engine.dispose()
 
 
 @task(log_prints=True, 
@@ -185,8 +187,10 @@ def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]],
             start_date = datetime.date.today() - datetime.timedelta(days=1.0)
         interval = '1m'
 
-        return [download_one_day.submit(symbol, exchange, start_date, interval)
+        futures = [download_one_day.submit(symbol, exchange, start_date, interval)
                 for symbol, exchange in symbol_list]
+        [f.result() for f in futures]
+        return None
 
     except:
         logger.exception(f'download 1m data for symbol list: {symbol_list} on date: {start_date} fail.')
@@ -233,8 +237,8 @@ def download_1m_date_all(start_date: Optional[datetime.date] = None,
     except:
         logger.exception(f'donwload 1m data with query_sql: {query_symbol_sql} on date: {start_date} failed')
     finally:
-        engine.dispose()
         conn.close()
+        engine.dispose()
 
 @task(log_prints=True, 
       retries=3, 
@@ -361,6 +365,9 @@ def inject_data_all(query_symbol_sql: Optional[str] = None,
     finally:
         engine.dispose()
         conn.close()
+
+
+
 
 if __name__ == "__main__":
     down_load_data = download_1m_date_all.to_deployment(name='down_load_1m_data')
