@@ -365,4 +365,4 @@ def inject_data_all(query_symbol_sql: Optional[str] = None,
 if __name__ == "__main__":
     down_load_data = download_1m_date_all.to_deployment(name='down_load_1m_data')
     inject_data = inject_data_all.to_deployment(name='inject_data_all')
-    serve(down_load_data, inject_data, tst)
+    serve(down_load_data, inject_data)
