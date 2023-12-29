@@ -1,6 +1,6 @@
 services:
   prefect:
-    image: prefecthq/prefect:2.14-python3.10-conda
+    image: prefecthq/prefect:2-python3.11-conda
     environment:
       - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://root:root@postgres:5432/prefect
       - PREFECT_SERVER_API_HOST=0.0.0.0
@@ -23,20 +23,6 @@ services:
       - ${MINIO_PATH}:/data:rw
 
     command: server /data --console-address ":9090"
-    networks:
-      - q_data_proj_pg_net
-  
-  metabase:
-    image: metabase/metabase
-    ports: 
-      - 3001:3000
-    environment:
-      - MB_DB_TYPE=postgres 
-      - MB_DB_DBNAME=metabaseappdb 
-      - MB_DB_PORT=5432
-      - MB_DB_USER=root 
-      - MB_DB_PASS=root 
-      - MB_DB_HOST=postgres 
     networks:
       - q_data_proj_pg_net
 

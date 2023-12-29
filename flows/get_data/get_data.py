@@ -174,7 +174,7 @@ def record_download_result(engine: db.Engine, record_list: List[DownResult]):
         session.commit()
     
 
-@flow(log_prints=True)
+@flow(log_prints=True, retries=3, timeout_seconds=600)
 def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]], 
                           start_date: Optional[datetime.date] = None):  
     engine = db.create_engine(variables.get('q_data_db_connect_url'))
@@ -218,7 +218,7 @@ def get_symbol_list(conn: db.Connection, query_sql: Optional[str] = None) -> Seq
     return r.fetchall()
       
 
-@flow()
+@flow(retries=4)
 def download_1m_date_all(start_date: Optional[datetime.date] = None,
                                   query_symbol_sql: Optional[str] = None,
                                   chunk_size: int = 20):
