@@ -174,7 +174,11 @@ def record_download_result(engine: db.Engine, record_list: List[DownResult]):
         session.commit()
     
 
-@flow(log_prints=True, retries=3, timeout_seconds=600)
+@flow(log_prints=True, 
+      retries=3, 
+      timeout_seconds=600, 
+      cache_result_in_memory=False,
+      persist_result=False)
 def download_1m_data_part(symbol_list: List[Tuple[SymbolName, ExchangeName]], 
                           start_date: Optional[datetime.date] = None):  
     engine = db.create_engine(variables.get('q_data_db_connect_url'))
@@ -367,6 +371,66 @@ def inject_data_all(query_symbol_sql: Optional[str] = None,
         conn.close()
 
 
+@flow(log_prints=True)
+def download_1m_date_last_day_all_part1():
+    yestoday = datetime.date.today() - datetime.timedelta(days=1)
+    sql = f"""
+WITH 
+all_data AS(
+SELECT symbol, exchange
+FROM stock_meta 
+WHERE delistingdate is NULL 
+AND symbol NOT IN  (
+	SELECT DISTINCT symbol 
+	FROM yf_bad_record 
+	where data_date='{yestoday}')
+ORDER BY symbol
+)
+
+
+SELECT *
+FROM all_data
+LIMIT (
+	SELECT COUNT(*)
+	FROM all_data
+) / 2
+    """
+    download_1m_date_all(
+        yestoday,
+        sql,
+        chunk_size=200
+    )
+
+
+@flow(log_prints=True)
+def download_1m_date_last_day_all_part2():
+    yestoday = datetime.date.today() - datetime.timedelta(days=1)
+    sql = f"""
+WITH 
+all_data AS(
+SELECT symbol, exchange
+FROM stock_meta 
+WHERE delistingdate is NULL 
+AND symbol NOT IN  (
+	SELECT DISTINCT symbol 
+	FROM yf_bad_record 
+	where data_date='{yestoday}')
+ORDER BY symbol
+)
+
+
+SELECT *
+FROM all_data
+OFFSET (
+	SELECT COUNT(*)
+	FROM all_data
+) / 2
+    """
+    download_1m_date_all(
+        yestoday,
+        sql,
+        chunk_size=200
+    )
 
 
 if __name__ == "__main__":
