@@ -372,7 +372,7 @@ def inject_data_all(query_symbol_sql: Optional[str] = None,
 
 
 @flow(log_prints=True)
-def download_1m_date_last_day_all_part1(date: Optional[datetime._IsoCalendarDate]=None):
+def download_1m_date_last_day_all_part1(date: Optional[datetime.date]=None):
     if date is None:
         yestoday = datetime.date.today() - datetime.timedelta(days=1)
     else:
@@ -406,7 +406,7 @@ LIMIT (
 
 
 @flow(log_prints=True)
-def download_1m_date_last_day_all_part2(date: Optional[datetime._IsoCalendarDate]=None):
+def download_1m_date_last_day_all_part2(date: Optional[datetime.date]=None):
     if date is None:
         yestoday = datetime.date.today() - datetime.timedelta(days=1)
     else:
