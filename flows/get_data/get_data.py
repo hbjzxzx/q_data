@@ -438,4 +438,6 @@ FROM all_data
 if __name__ == "__main__":
     down_load_data = download_1m_date_all.to_deployment(name='down_load_1m_data')
     inject_data = inject_data_all.to_deployment(name='inject_data_all')
-    serve(down_load_data, inject_data)
+    part2 = download_1m_date_last_day_all_part2.to_deployment(name='down_load_all_part2')
+    part1 = download_1m_date_last_day_all_part1.to_deployment(name='down_load_all_part1')
+    serve(down_load_data, inject_data, part1, part2)
