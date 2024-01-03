@@ -372,8 +372,11 @@ def inject_data_all(query_symbol_sql: Optional[str] = None,
 
 
 @flow(log_prints=True)
-def download_1m_date_last_day_all_part1():
-    yestoday = datetime.date.today() - datetime.timedelta(days=1)
+def download_1m_date_last_day_all_part1(date: Optional[datetime._IsoCalendarDate]=None):
+    if date is None:
+        yestoday = datetime.date.today() - datetime.timedelta(days=1)
+    else:
+        yestoday = date
     sql = f"""
 WITH 
 all_data AS(
@@ -403,8 +406,11 @@ LIMIT (
 
 
 @flow(log_prints=True)
-def download_1m_date_last_day_all_part2():
-    yestoday = datetime.date.today() - datetime.timedelta(days=1)
+def download_1m_date_last_day_all_part2(date: Optional[datetime._IsoCalendarDate]=None):
+    if date is None:
+        yestoday = datetime.date.today() - datetime.timedelta(days=1)
+    else:
+        yestoday = date
     sql = f"""
 WITH 
 all_data AS(
@@ -421,11 +427,7 @@ ORDER BY symbol
 
 SELECT *
 FROM all_data
-OFFSET (
-	SELECT COUNT(*)
-	FROM all_data
-) / 2
-    """
+"""
     download_1m_date_all(
         yestoday,
         sql,
