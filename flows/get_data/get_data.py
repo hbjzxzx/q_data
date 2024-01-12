@@ -88,7 +88,8 @@ def download_one_day(symbol: str,
             error_msg=e.response.content.decode(),
             symbol=symbol,
             exchange=exchange,
-            file_path=''))
+            file_path='',
+            data_date=start_time))
     except Exception as e:
         result_list.append(DownResult(
             bucket_name='yfinance-daily',
@@ -96,7 +97,8 @@ def download_one_day(symbol: str,
             error_msg=f"error: {e} trace_back: {traceback.format_exc()}",
             symbol=symbol,
             exchange=exchange,
-            file_path=''))
+            file_path='',
+            data_date=start_time))
     else:
         try:
             info = tickers.info
