@@ -224,7 +224,9 @@ def get_symbol_list(conn: db.Connection, query_sql: Optional[str] = None) -> Seq
     return r.fetchall()
       
 
-@flow(retries=4)
+@flow(retries=4,
+      cache_result_in_memory=False,
+      persist_result=False)
 def download_1m_date_all(start_date: Optional[datetime.date] = None,
                                   query_symbol_sql: Optional[str] = None,
                                   chunk_size: int = 20):
