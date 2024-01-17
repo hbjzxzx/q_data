@@ -407,6 +407,7 @@ LIMIT (
         sql,
         chunk_size=200
     )
+    return None
 
 
 @flow(log_prints=True)
@@ -437,6 +438,7 @@ FROM all_data
         sql,
         chunk_size=200
     )
+    return None
 
 
 if __name__ == "__main__":
